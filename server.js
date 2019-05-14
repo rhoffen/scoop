@@ -7,13 +7,6 @@ let database = {
   nextCommentId: 1
 };
 
-// id: 0,
-// body: '',
-// username: '',
-// articleId: 0,
-// upvotedBy: [],
-// downvotedBy: []
-
 const routes = {
   '/users': {
     'POST': getOrCreateUser
@@ -41,7 +34,8 @@ const routes = {
   },
 
   '/comments/:id' : {
-    'PUT' : updateComment
+    'PUT' : updateComment,
+    'DELETE' : deleteComment
   },
 
   '/comments/:id/upvote' : {
@@ -293,8 +287,6 @@ function createComment(url, request) {
 
 //comment bookmark
 function updateComment(url, request) {
-  //console.log(url.split('/'));
-  //console.log(request);
   const id = Number(url.split('/').filter(segment => segment)[1]);
   const savedComment = database.comments[id];
   const requestComment = request.body && request.body.comment;
@@ -312,6 +304,27 @@ function updateComment(url, request) {
 
   return response;
 };
+
+function deleteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const savedComment = database.comments[id];
+  const response = {};
+
+  if (savedComment) {
+    const articleRefCommentArray = database.articles[savedComment.articleId].commentIds;
+    const userRefCommentArray = database.users[savedComment.username].commentIds;
+    database.comments[id] = null;
+    database.articles[savedComment.articleId].commentIds = articleRefCommentArray.filter(cId => cId !== id);
+    database.users[savedComment.username].commentIds = userRefCommentArray.filter(cId => cId !== id);
+    response.status = 204;
+  } else {
+    response.status = 404;
+  }
+
+  return response;
+};
+
+
 // Write all code above this line.
 
 const http = require('http');
