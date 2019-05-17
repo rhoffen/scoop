@@ -1,13 +1,31 @@
 // database is let instead of const to allow us to modify it in test.js
-let database = {
-  users: {},
-  articles: {},
-  nextArticleId: 1,
-  comments: {},
-  nextCommentId: 1
-};
+const yaml = require('js-yaml');
+const fs = require('fs');
+
+const loadDatabase = () => {
+  let database = yaml.safeLoad(fs.readFileSync('./database.yml'));
+  return database;
+}
+
+const saveDatabase = (db) => {
+  yaml.safeDump(db);
+}
+
+
+let database = loadDatabase();
+
+// let database = {
+//   users: {},
+//   articles: {},
+//   nextArticleId: 1,
+//   comments: {},
+//   nextCommentId: 1
+// };
 
 const routes = {
+  //beforeEach(loadDatabase)
+  //afterEach(saveDatabase)
+
   '/users': {
     'POST': getOrCreateUser
   },
@@ -39,10 +57,12 @@ const routes = {
   },
 
   '/comments/:id/upvote' : {
- 
+    'PUT': upvoteComment
   },
 
-  '/comments/:id/downvote' : {}
+  '/comments/:id/downvote' : {
+    'PUT': downvoteComment
+  }
 };
 
 function getUser(url, request) {
@@ -285,7 +305,6 @@ function createComment(url, request) {
   return response;
 }
 
-//comment bookmark
 function updateComment(url, request) {
   const id = Number(url.split('/').filter(segment => segment)[1]);
   const savedComment = database.comments[id];
@@ -324,7 +343,41 @@ function deleteComment(url, request) {
   return response;
 };
 
+function upvoteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  let savedComment = database.comments[id];
+  const response = {};
 
+  if (savedComment && database.users[username]) {
+    savedComment = upvote(savedComment, username);
+
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
+
+function downvoteComment(url, request) {
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  let savedComment = database.comments[id];
+  const response = {};
+
+  if (savedComment && database.users[username]) {
+    savedComment = downvote(savedComment, username);
+
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {
+    response.status = 400;
+  }
+
+  return response;
+}
 // Write all code above this line.
 
 const http = require('http');
