@@ -7,8 +7,9 @@ const loadDatabase = () => {
   return database;
 }
 
-const saveDatabase = (db) => {
-  yaml.safeDump(db);
+const saveDatabase = (database) => {
+  //fs.writeFile('./database.yml', yaml.safeDump(database, {skipInvalid: true}));
+  fs.writeFile('./database.yml', yaml.safeDump(database, {skipInvalid: true}), error => {console.log("error")});
 }
 
 
@@ -23,8 +24,6 @@ let database = loadDatabase();
 // };
 
 const routes = {
-  //beforeEach(loadDatabase)
-  //afterEach(saveDatabase)
 
   '/users': {
     'POST': getOrCreateUser
