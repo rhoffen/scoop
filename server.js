@@ -1,29 +1,34 @@
 // database is let instead of const to allow us to modify it in test.js
-const readYaml = require('read-yaml');
+
 const fs = require('fs');
-const writeYaml = require('write-yaml');
+const yaml = require('js-yaml');
+
+//To restart the app with no data, delete the contents of ./database.yml and replace with this code:
+//users   : {}
+//articles: {}
+//nextArticleId: 1
+//comments: {}
+//nextCommentId: 1
+
+const saveDatabase = () => {
+  try {
+    fs.writeFileSync('./database.yml', yaml.safeDump(database));
+  } catch (e) {
+    console.log(e);
+  }
+}
 
 const loadDatabase = () => {
-  let database = readYaml.sync('./database.yml');
-  return database;
+  try {
+    database =  yaml.safeLoad(fs.readFileSync('./database.yml', 'utf-8'));
+    console.log(database);
+    return database;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
-let database = loadDatabase();
-
-console.log(database);
-console.log(database.comments);
-
-const saveDatabase = (database) => {
-  writeYaml.sync('./database.yml', database);
-}
-
-// let database = {
-//   users: {},
-//   articles: {},
-//   nextArticleId: 1,
-//   comments: {},
-//   nextCommentId: 1
-// };
+loadDatabase();
 
 const routes = {
 
