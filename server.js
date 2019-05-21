@@ -2,13 +2,9 @@
 
 const fs = require('fs');
 const yaml = require('js-yaml');
+let database;
 
-//To restart the app with no data, delete the contents of ./database.yml and replace with this code:
-//users   : {}
-//articles: {}
-//nextArticleId: 1
-//comments: {}
-//nextCommentId: 1
+//To restart the app with no data, delete the contents of ./database.yml
 
 const saveDatabase = () => {
   try {
@@ -18,16 +14,26 @@ const saveDatabase = () => {
   }
 }
 
+//If there are no data to load in database.yml, initialize the database with a starter object
 const loadDatabase = () => {
   try {
     database =  yaml.safeLoad(fs.readFileSync('./database.yml', 'utf-8'));
-    console.log(database);
+    if (!database) {
+      database = {
+        users: {},
+        articles: {},
+        nextArticleId: 1,
+        comments: {},
+        nextCommentId: 1
+        };
+    }
     return database;
   } catch (e) {
     console.log(e);
   }
 }
 
+//initialize database
 loadDatabase();
 
 const routes = {
