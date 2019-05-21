@@ -1,19 +1,21 @@
 // database is let instead of const to allow us to modify it in test.js
-const yaml = require('js-yaml');
+const readYaml = require('read-yaml');
 const fs = require('fs');
+const writeYaml = require('write-yaml');
 
 const loadDatabase = () => {
-  let database = yaml.safeLoad(fs.readFileSync('./database.yml'));
+  let database = readYaml.sync('./database.yml');
   return database;
 }
 
-const saveDatabase = (database) => {
-  //fs.writeFile('./database.yml', yaml.safeDump(database, {skipInvalid: true}));
-  fs.writeFile('./database.yml', yaml.safeDump(database, {skipInvalid: true}), error => {console.log("error")});
-}
-
-
 let database = loadDatabase();
+
+console.log(database);
+console.log(database.comments);
+
+const saveDatabase = (database) => {
+  writeYaml.sync('./database.yml', database);
+}
 
 // let database = {
 //   users: {},
